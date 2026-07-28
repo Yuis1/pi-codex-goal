@@ -2,7 +2,11 @@ import type { ExtensionHandler, TurnEndEvent, TurnStartEvent } from "@earendil-w
 
 import { assistantTurnTokens, isAbortedAssistantMessage, isToolUseAssistantMessage } from "./goal-accounting.js";
 import { isAssistantContextOverflow, isErrorAssistantMessage } from "./recovery.js";
-import { getContextWindow, runStaleQueuedWorkPlan } from "./goal-runtime-event-utils.js";
+import {
+  getContextWindow,
+  runStaleQueuedWorkPlan,
+  shouldPauseStatusInspectionOnlyContinuation,
+} from "./goal-runtime-event-utils.js";
 import type {
   GoalRuntimeTurnHandlerContext,
   ToolExecutionEndEvent,
@@ -20,11 +24,12 @@ export function createTurnEventHandlers(deps: GoalRuntimeTurnHandlerContext) {
       status.refreshUi(ctx);
     }) satisfies ExtensionHandler<TurnStartEvent>,
 
-    onToolExecutionEnd: (async (_event, ctx) => {
+    onToolExecutionEnd: (async (event, ctx) => {
       if (runStaleQueuedWorkPlan(runtimeState.staleQueuedWorkGuard.planToolExecutionEnd(), ctx, deps)) {
         return;
       }
 
+      runtimeState.agentRunToolNames.push(event.toolName);
       goalAccounting.accountProgress(ctx, true, 0, true);
       stateController.maybeFlushRuntimePersistence("runtime");
     }) satisfies ExtensionHandler<ToolExecutionEndEvent>,
@@ -54,8 +59,12 @@ export function createTurnEventHandlers(deps: GoalRuntimeTurnHandlerContext) {
         stateController.beginOverflowRecovery(ctx);
         return;
       }
+      const suppressContinuation = shouldPauseStatusInspectionOnlyContinuation(
+        runtimeState.agentRunFromContinuation,
+        runtimeState.agentRunToolNames,
+      );
       recoveryRuntime.finishSuccessfulAssistantTurn(event.message, ctx, {
-        continueGoal: !isToolUseAssistantMessage(event.message),
+        continueGoal: !isToolUseAssistantMessage(event.message) && !suppressContinuation,
       });
     }) satisfies ExtensionHandler<TurnEndEvent>,
   };
