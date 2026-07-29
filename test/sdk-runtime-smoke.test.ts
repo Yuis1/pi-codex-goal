@@ -174,6 +174,10 @@ test("SDK runtime emits a continuation after willRetry compaction when no retry 
     const runner = session.extensionRunner;
     const createGoal = runner.getToolDefinition("create_goal");
     assert.ok(createGoal);
+    const createGoalSchema = createGoal.parameters as {
+      properties?: { token_budget?: { minimum?: number } };
+    };
+    assert.equal(createGoalSchema.properties?.token_budget?.minimum, 100_000_000);
     const result = await createGoal.execute(
       "tool-call",
       { objective: "ship it" },

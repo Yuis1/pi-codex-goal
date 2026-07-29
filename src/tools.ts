@@ -9,14 +9,17 @@ import type { GoalEntrySource, GoalResult, ThreadGoal } from "./types.js";
 
 const EmptyParams = Type.Object({});
 
+export const MIN_EXPLICIT_TOKEN_BUDGET = 100_000_000;
+
 const CreateGoalParams = Type.Object({
   objective: Type.String({
     description: "Concrete objective to pursue until completion.",
   }),
   token_budget: Type.Optional(
     Type.Integer({
-      description: "Optional positive integer token budget.",
-      minimum: 1,
+      description:
+        "Optional token budget. Omit for an unbounded goal; explicit budgets must be at least 100,000,000 tokens.",
+      minimum: MIN_EXPLICIT_TOKEN_BUDGET,
     }),
   ),
   replace_existing: Type.Optional(
@@ -77,6 +80,9 @@ export function registerGoalTools(pi: ExtensionAPI, host: ToolHost): void {
     promptGuidelines: TOOL_PROMPT_GUIDELINES,
     parameters: CreateGoalParams,
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      if (params.token_budget !== undefined && params.token_budget < MIN_EXPLICIT_TOKEN_BUDGET) {
+        throwToolError("Explicit goal token budgets must be at least 100,000,000 tokens.");
+      }
       const current = host.getGoal();
       const shouldReplaceExisting = params.replace_existing === true && current !== null && current.status !== "complete";
       const result = shouldReplaceExisting

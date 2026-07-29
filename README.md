@@ -10,6 +10,17 @@ This package adds a `/goal` command plus three model-callable tools:
 
 Goal state is stored in pi session custom entries, so it follows session history, resume, fork, tree navigation, reload, and compaction behavior without an external database.
 
+## Yuis policy fork
+
+This repository temporarily carries a runtime-enforced token-budget policy on top of upstream `0.1.39`:
+
+- omitting `create_goal.token_budget` creates an unbounded goal;
+- a newly requested explicit budget must be at least `100,000,000` tokens;
+- both the tool schema and execution boundary enforce the minimum;
+- persisted historical goals with smaller budgets remain readable.
+
+The policy prevents an agent from accidentally stopping long autonomous work with a small invented budget. It does not add a default cap. Upstream tracking is [fitchmultz/pi-codex-goal#51](https://github.com/fitchmultz/pi-codex-goal/issues/51). Once an official release provides equivalent runtime enforcement, this fork should stop carrying the patch and managed installations should return to a pinned official package after compatibility verification.
+
 ## Install
 
 Install from npm:
