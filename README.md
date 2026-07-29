@@ -12,7 +12,7 @@ Goal state is stored in pi session custom entries, so it follows session history
 
 ## Yuis policy fork
 
-This repository temporarily carries a runtime-enforced token-budget policy on top of upstream `0.1.39`:
+This repository temporarily carries a runtime-enforced token-budget policy in `0.1.39-yuis.2` on top of upstream `0.1.39`:
 
 - omitting `create_goal.token_budget` creates an unbounded goal;
 - a newly requested explicit budget must be at least `100,000,000` tokens;
