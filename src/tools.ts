@@ -5,11 +5,10 @@ import { Type } from "typebox";
 import { goalToolResponse, toToolText, type GoalToolResponse } from "./format.js";
 import { createGoal, replaceGoal } from "./state.js";
 import { TOOL_PROMPT_GUIDELINES } from "./prompts.js";
+import { explicitTokenBudgetError, MIN_EXPLICIT_TOKEN_BUDGET } from "./token-budget-policy.js";
 import type { GoalEntrySource, GoalResult, ThreadGoal } from "./types.js";
 
 const EmptyParams = Type.Object({});
-
-export const MIN_EXPLICIT_TOKEN_BUDGET = 100_000_000;
 
 const CreateGoalParams = Type.Object({
   objective: Type.String({
@@ -80,8 +79,9 @@ export function registerGoalTools(pi: ExtensionAPI, host: ToolHost): void {
     promptGuidelines: TOOL_PROMPT_GUIDELINES,
     parameters: CreateGoalParams,
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-      if (params.token_budget !== undefined && params.token_budget < MIN_EXPLICIT_TOKEN_BUDGET) {
-        throwToolError("Explicit goal token budgets must be at least 100,000,000 tokens.");
+      const budgetError = explicitTokenBudgetError(params.token_budget);
+      if (budgetError) {
+        throwToolError(budgetError);
       }
       const current = host.getGoal();
       const shouldReplaceExisting = params.replace_existing === true && current !== null && current.status !== "complete";
