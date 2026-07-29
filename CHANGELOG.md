@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.39-yuis.1 - 2026-07-29
+
+- Keep omitted goal budgets unbounded while rejecting newly requested explicit budgets below 100,000,000 tokens at both the tool schema and execution boundary.
+- Preserve reconstruction compatibility for historical goals with smaller budgets.
+- Document the temporary fork, upstream issue, and exit condition for returning to an official release.
+
 ## 0.1.39 - 2026-07-28
 
 - Pause active goals when a hidden continuation run only calls `get_goal` / namespaced `*__get_goal` and makes no actionable progress, so blocked status-inspection loops stop and surface `/goal resume` attention instead of spinning forever (#47).

@@ -1,6 +1,6 @@
 {
   "name": "pi-codex-goal",
-  "version": "0.1.39",
+  "version": "0.1.39-yuis.1",
   "description": "Codex-style goal tracking and continuation for pi.",
   "type": "module",
   "author": "Mitch Fultz (https://github.com/fitchmultz)",
@@ -28,12 +28,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fitchmultz/pi-codex-goal.git"
+    "url": "git+https://github.com/Yuis1/pi-codex-goal.git"
   },
   "bugs": {
-    "url": "https://github.com/fitchmultz/pi-codex-goal/issues"
+    "url": "https://github.com/Yuis1/pi-codex-goal/issues"
   },
-  "homepage": "https://github.com/fitchmultz/pi-codex-goal#readme",
+  "homepage": "https://github.com/Yuis1/pi-codex-goal#readme",
   "pi": {
     "extensions": [
       "./src/index.ts"
